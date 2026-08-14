@@ -1,0 +1,35 @@
+# mini-vps-platform 用 VM spec。
+# `uv run mini-vps create specs/web-1.yaml` で作成する。
+#
+# base_image は build/build-golden-image.sh の出力ファイル名に置き換えること
+# (ビルドのたびにファイル名の日付部分が変わるため)。
+name: web-1
+memory: 1024
+vcpus: 2
+base_image: minivps-web-golden-20260814.qcow2
+disk: 10
+hostname: web-1
+networks:
+  # 1件目 = 管理NIC。静的IPにする。
+  # mini_vps/manager.py の _static_ipv4() は networks の先頭から走査して
+  # 最初に見つかった静的NICのIPを `mini-vps status`/`get` に返す。管理NICを
+  # 先頭かつ静的にすることで、複数の固定IPを持つこのVMでも
+  # 「mini-vps status web-1」がSSH到達可能な管理IPを返す。
+  - name: default
+    address: 192.168.122.40/24
+    gateway: 192.168.122.1   # このVM唯一のデフォルトルート
+    # 全NICが静的だとnetplanがリゾルバを持たず、運用者がaptを叩けなくなる。
+    nameservers:
+      - 192.168.122.1
+  # 2件目 = サービスNIC。seg1 に配置し、db-1(seg2)へは router-1 経由で到達する。
+  - name: seg1
+    address: 192.168.201.40/24
+# db-1(seg2)への経路。これが無いとdb-1宛のパケットが管理NICのデフォルトルートへ
+# 流れて届かない。db-1側にも対称の戻り経路が要る。
+# 経路が通っても、router-1の許可リストに3306のルールを追加しない限り
+# forward chainの既定拒否で通信は止まる(README「router-1側の許可ルール」参照)。
+static_routes:
+  - destination: 192.168.202.0/24
+    via: 192.168.201.10   # router-1 の seg1 側IP
+# filtersは未設定(デフォルトnull=libvirt側の追加inbound制限なし)。
+# 受信保護はゴールデンイメージに焼き込んだゲスト内nftablesのinput chainが担う。
