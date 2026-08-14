@@ -11,7 +11,7 @@ web-1が担うのはApacheの稼働と、db-1への接続元であること。�
 ## 前提条件
 
 - mini-vps-platformがセットアップ済み(`~/.ssh/minivps_ed25519.pub`公開鍵、`seg1`ネットワーク、`images`ストレージプール、`ubuntu-26.04.img`が`images`プールに存在すること)。
-- db-1へ接続する場合は、[minivps-router-appliance](https://github.com/0x69d/minivps-router-appliance)のrouter-1が稼働し、3306の許可ルールが追記されていること([router-1側の許可ルール](#router-1側の許可ルール)参照)。
+- db-1へ接続する場合は、[minivps-router-appliance](https://github.com/0x69d/minivps-router-appliance)のrouter-1が稼働し、3306の許可ルールが追記されていること([router-1側の許可ルール](#router-1側の許可ルール)参照)。あわせてホストで`net.bridge.bridge-nf-call-iptables`が0であること(理由はminivps-db-applianceのREADME「送信元IPの保存」)。
 - `tests/check-apache-conf.sh` を回す場合はホスト側に `apache2`。
 
 ## アーキテクチャ
