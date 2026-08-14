@@ -6,7 +6,7 @@
 
 mini-vps-platformにはこれまで、実際のワークロードを載せて層ごとにセグメントを分ける構成の実例が無かった。本リポジトリは[minivps-db-appliance](https://github.com/0x69d/minivps-db-appliance)と対になり、web層(seg1)とDB層(seg2)をrouter-1で分離して、web層からしかDBに到達できない構成を実現する。
 
-web-1が担うのはApacheの稼働と、db-1への接続元であること。サイトの中身は載せず、Apacheは既定のウェルカムページのまま置く。
+web-1が担うのはApacheの稼働と、db-1への接続元であること。サイトの中身は載せず、Apacheは既定のウェルカムページのまま置く。ゴールデンイメージにはApacheのほかMySQLクライアント(`mysql-client-core`)を焼き込む。minivps-db-applianceのREADMEがdb-1への疎通確認をweb-1から行うよう案内しており、クライアントが無いとその手順を実行できないため。
 
 ## 前提条件
 
@@ -87,12 +87,12 @@ sudo systemctl reload nftables
 
 ## tests
 
-- `tests/lint-nftables.sh` — nftables.confの構文チェック。
+- `tests/lint-nftables.sh` — nftables.confの構文チェック(要`nft`・CAP_NET_ADMIN。sudoで実行する)。
 - `tests/check-apache-conf.sh` — 最小configにIncludeしての`apache2 -t`(要`apache2`)。
 
 ## トラブルシューティング
 
-- ビルドがタイムアウトした場合: `virsh console <ビルドVM名>` でシリアルコンソールに接続して調査する。ビルド用ドメインはtransientで、シャットダウンと同時に消滅する点に注意。
+- ビルドがタイムアウトした場合: 調査のためビルドVMとそのディスクは意図的に残される。表示されるSSH手順で `cloud-init status --long` と `/var/log/cloud-init-output.log` を確認する。cloud-initの初期段階で止まっているとSSHは通らないため、その場合は `virsh console <ビルドVM名>` でシリアルコンソールから調査する。調査後は `virsh destroy <ビルドVM名>` で破棄すれば、残骸は次回実行の冒頭掃除が回収する。
 - db-1へ繋がらない: 経路とフィルタを切り分ける。`ip route get 192.168.202.50` で経路を、届かない場合は[router-1側の許可ルール](#router-1側の許可ルール)の追記漏れを確認する。router-1のforward chainは既定拒否のため、経路が正しくても許可ルールが無ければ止まる。
 - `mini-vps status`が管理IP以外を返す場合: `specs/web-1.yaml`の`networks`の並び順(`default`が先頭かつ静的IPになっているか)を確認する。
 - DHCPレンジとの重複: 192.168.201.40/192.168.122.40はいずれもlibvirt DHCPレンジ(.2〜.254)内にある。web-1は常時起動の運用を前提とし、長期停止させる場合は同アドレスのDHCP払い出しと衝突しうる点に注意する。
