@@ -87,7 +87,7 @@ sudo systemctl reload nftables
 
 ## tests
 
-- `tests/lint-nftables.sh` — nftables.confの構文チェック。
+- `tests/lint-nftables.sh` — nftables.confの構文チェック(要`nft`・CAP_NET_ADMIN。sudoで実行する)。
 - `tests/check-apache-conf.sh` — 最小configにIncludeしての`apache2 -t`(要`apache2`)。
 
 ## トラブルシューティング
