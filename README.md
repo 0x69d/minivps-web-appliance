@@ -6,7 +6,7 @@
 
 mini-vps-platformにはこれまで、実際のワークロードを載せて層ごとにセグメントを分ける構成の実例が無かった。本リポジトリは[minivps-db-appliance](https://github.com/0x69d/minivps-db-appliance)と対になり、web層(seg1)とDB層(seg2)をrouter-1で分離して、web層からしかDBに到達できない構成を実現する。
 
-web-1が担うのはApacheの稼働と、db-1への接続元であること。サイトの中身は載せず、Apacheは既定のウェルカムページのまま置く。
+web-1が担うのはApacheの稼働と、db-1への接続元であること。サイトの中身は載せず、Apacheは既定のウェルカムページのまま置く。ゴールデンイメージにはApacheのほかMySQLクライアント(`mysql-client-core`)を焼き込む。minivps-db-applianceのREADMEがdb-1への疎通確認をweb-1から行うよう案内しており、クライアントが無いとその手順を実行できないため。
 
 ## 前提条件
 

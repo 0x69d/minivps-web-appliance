@@ -106,6 +106,9 @@ package_update: true
 packages:
   - nftables
   - apache2
+  # web-1はdb-1への接続元であり、minivps-db-applianceのREADMEは疎通確認を
+  # web-1から行うよう案内する。クライアントが無いとその手順を実行できない。
+  - mysql-client-core
 write_files:
   - path: /etc/nftables.conf
     permissions: '0640'
