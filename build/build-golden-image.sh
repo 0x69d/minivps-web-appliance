@@ -23,6 +23,11 @@ GOLDEN_IMAGE_NAME="${GOLDEN_IMAGE_NAME:-minivps-web-golden-$(date +%Y%m%d).qcow2
 BUILD_VM_NAME="minivps-web-build-$$"
 BUILD_MEMORY_MB="${BUILD_MEMORY_MB:-1024}"
 BUILD_VCPUS="${BUILD_VCPUS:-2}"
+# ビルド用ディスクの拡張後サイズ。ubuntu-26.04.img の仮想サイズは3.5GiBで
+# rootfsは2.3GiBしか無く、パッケージを足すとすぐ "No space left on device" になる。
+# 既定値は specs/web-1.yaml の disk と揃える。ゴールデンイメージの仮想サイズが
+# specの disk を超えるとVM作成時のオーバーレイ作成に失敗するため。
+BUILD_DISK_SIZE="${BUILD_DISK_SIZE:-10G}"
 SSH_PUBKEY_PATH="${SSH_PUBKEY_PATH:-$HOME/.ssh/minivps_ed25519.pub}"
 IMAGES_POOL="${IMAGES_POOL:-images}"
 SEEDS_POOL="${SEEDS_POOL:-vps-seeds}"
@@ -65,6 +70,10 @@ virsh vol-delete --pool "$SEEDS_POOL" "$TEMP_SEED_VOL" >/dev/null 2>&1 || true
 echo "==> base imageをvol-cloneでビルド用ディスクに複製: $BASE_IMAGE_NAME -> $TEMP_DISK_VOL"
 virsh pool-refresh "$IMAGES_POOL" >/dev/null
 virsh vol-clone --pool "$IMAGES_POOL" "$BASE_IMAGE_NAME" "$TEMP_DISK_VOL"
+
+echo "==> ビルド用ディスクを ${BUILD_DISK_SIZE} へ拡張"
+# パーティションとファイルシステムの拡張はゲスト側のcloud-init growpartが起動時に行う。
+virsh vol-resize --pool "$IMAGES_POOL" "$TEMP_DISK_VOL" "$BUILD_DISK_SIZE"
 
 echo "==> cloud-init user-data/meta-data を生成"
 b64() { base64 -w0 "$1"; }
