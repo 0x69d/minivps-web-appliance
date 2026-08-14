@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# image/etc/apache2/conf-available/99-minivps-hardening.conf の構文チェック。
+# image/etc/apache2/conf-available/zz-minivps-hardening.conf の構文チェック。
 # 前提: apache2(未導入なら `sudo apt install apache2`)。
 #
 # 実機の /etc/apache2 全体ではなく本リポジトリのファイルだけを検証したいため、
@@ -27,7 +27,7 @@ ServerRoot "$CHECK_DIR"
 PidFile "$CHECK_DIR/apache2.pid"
 ErrorLog "$CHECK_DIR/error.log"
 LoadModule mpm_event_module "$MODULES_DIR/mod_mpm_event.so"
-Include "$REPO_ROOT/image/etc/apache2/conf-available/99-minivps-hardening.conf"
+Include "$REPO_ROOT/image/etc/apache2/conf-available/zz-minivps-hardening.conf"
 EOF
 
 echo "==> apache2 -t(最小configにIncludeして検証)"

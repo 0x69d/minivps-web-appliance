@@ -105,17 +105,17 @@ write_files:
     permissions: '0640'
     encoding: b64
     content: $(b64 "$REPO_ROOT/image/etc/nftables.conf")
-  - path: /etc/apache2/conf-available/99-minivps-hardening.conf
+  - path: /etc/apache2/conf-available/zz-minivps-hardening.conf
     permissions: '0644'
     encoding: b64
     defer: true
-    content: $(b64 "$REPO_ROOT/image/etc/apache2/conf-available/99-minivps-hardening.conf")
+    content: $(b64 "$REPO_ROOT/image/etc/apache2/conf-available/zz-minivps-hardening.conf")
   - path: /root/golden-finalize.sh
     permissions: '0700'
     content: |
       #!/bin/bash
       set -euxo pipefail
-      a2enconf 99-minivps-hardening
+      a2enconf zz-minivps-hardening
       systemctl enable nftables.service apache2.service
       # --machine-id は比較的新しいcloud-init(24.1+)のみ対応。未対応版へのフォールバック。
       cloud-init clean --logs --machine-id || cloud-init clean --logs
